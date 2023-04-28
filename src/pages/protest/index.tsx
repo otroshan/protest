@@ -5,11 +5,10 @@ import Success  from "../../components/success";
 export default function DemoPage() {
   const [serviceCount, setServiceCount] = useState(1);
   const [payload, setPayload] = useState({});
+  const [success, setSuccess] = useState(false)
 
   useEffect(() => {
     if(payload?.service?.length > 0) {
-      var myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
 
       const body = JSON.parse(JSON.stringify(payload));
       body.dependencies = [];
@@ -17,22 +16,24 @@ export default function DemoPage() {
 
       var requestOptions = {
         method: 'POST',
-        headers: myHeaders,
         body: raw,
-        redirect: 'follow',
-        "ngrok-skip-browser-warning": true
       };
 
-      fetch("https://9e8c-45-112-53-194.in.ngrok.io/compose", requestOptions)
+      fetch("http://localhost:3000/compose", requestOptions)
         .then(response => response.text())
-        .then(result => console.log(result))
+        .then(result => {
+          if(result.success) {
+            setSuccess(true)
+          }
+          
+        })
         .catch(error => console.log('error', error));
     }
-
   }, [payload])
+
   return (
     <section style={{ background: "#22272f"}}>
-      <Success />
+      {success && <Success />} 
       <h1 className="heading">ProTest</h1>
       <div className="dependency">
         {[...Array(serviceCount)].map( (count, i) => (
@@ -41,9 +42,6 @@ export default function DemoPage() {
         <div>
           <button className="cta" onClick={() => setServiceCount(serviceCount + 1)}>
             Add dependency
-          </button>
-          <button className="cta" onClick={() => setServiceCount(serviceCount + 1)}>
-            Create Testing Environment
           </button>
         </div>
       </div>
